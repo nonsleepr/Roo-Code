@@ -987,6 +987,27 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 		this.handleWebviewAskResponse("noButtonClicked", text, images)
 	}
 
+	public async recheckPendingApproval() {
+		// Check if there's a pending ask (any of the three types)
+		const pendingAsk = this.interactiveAsk || this.resumableAsk || this.idleAsk
+		if (!pendingAsk || !pendingAsk.ask) {
+			return
+		}
+
+		const provider = this.providerRef.deref()
+		const state = provider ? await provider.getState() : undefined
+		const approval = await checkAutoApproval({
+			state,
+			ask: pendingAsk.ask,
+			text: pendingAsk.text,
+			isProtected: pendingAsk.isProtected,
+		})
+
+		if (approval.decision === "approve") {
+			this.approveAsk()
+		}
+	}
+
 	public async submitUserMessage(
 		text: string,
 		images?: string[],

@@ -557,6 +557,7 @@ export const webviewMessageHandler = async (
 		case "alwaysAllowMcp":
 			await updateGlobalState("alwaysAllowMcp", message.bool)
 			await provider.postStateToWebview()
+			await provider.getCurrentTask()?.recheckPendingApproval()
 			break
 		case "alwaysAllowModeSwitch":
 			await updateGlobalState("alwaysAllowModeSwitch", message.bool)
@@ -1179,6 +1180,7 @@ export const webviewMessageHandler = async (
 						message.toolName!,
 						Boolean(message.alwaysAllow),
 					)
+				await provider.getCurrentTask()?.recheckPendingApproval()
 			} catch (error) {
 				provider.log(
 					`Failed to toggle auto-approve for tool ${message.toolName}: ${JSON.stringify(error, Object.getOwnPropertyNames(error), 2)}`,
